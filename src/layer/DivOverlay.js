@@ -1,10 +1,10 @@
-import {Map} from '../map/Map';
-import {Layer} from './Layer';
-import {FeatureGroup} from './FeatureGroup';
-import * as Util from '../core/Util';
-import {toLatLng, LatLng} from '../geo/LatLng';
-import {toPoint} from '../geometry/Point';
-import * as DomUtil from '../dom/DomUtil';
+import {Map} from '../map/Map.js';
+import {Layer} from './Layer.js';
+import {FeatureGroup} from './FeatureGroup.js';
+import * as Util from '../core/Util.js';
+import {toLatLng, LatLng} from '../geo/LatLng.js';
+import {toPoint} from '../geometry/Point.js';
+import * as DomUtil from '../dom/DomUtil.js';
 
 /*
  * @class DivOverlay
@@ -42,7 +42,7 @@ export const DivOverlay = Layer.extend({
 	},
 
 	initialize(options, source) {
-		if (options && (options instanceof LatLng || Util.isArray(options))) {
+		if (options && (options instanceof LatLng || Array.isArray(options))) {
 			this._latlng = toLatLng(options);
 			Util.setOptions(this, source);
 		} else {
@@ -105,7 +105,7 @@ export const DivOverlay = Layer.extend({
 		}
 
 		if (map._fadeAnimated) {
-			DomUtil.setOpacity(this._container, 0);
+			this._container.style.opacity = 0;
 		}
 
 		clearTimeout(this._removeTimeout);
@@ -113,27 +113,27 @@ export const DivOverlay = Layer.extend({
 		this.update();
 
 		if (map._fadeAnimated) {
-			DomUtil.setOpacity(this._container, 1);
+			this._container.style.opacity = 1;
 		}
 
 		this.bringToFront();
 
 		if (this.options.interactive) {
-			DomUtil.addClass(this._container, 'leaflet-interactive');
+			this._container.classList.add('leaflet-interactive');
 			this.addInteractiveTarget(this._container);
 		}
 	},
 
 	onRemove(map) {
 		if (map._fadeAnimated) {
-			DomUtil.setOpacity(this._container, 0);
-			this._removeTimeout = setTimeout(DomUtil.remove.bind(null, this._container), 200);
+			this._container.style.opacity = 0;
+			this._removeTimeout = setTimeout(() => this._container.remove(), 200);
 		} else {
-			DomUtil.remove(this._container);
+			this._container.remove();
 		}
 
 		if (this.options.interactive) {
-			DomUtil.removeClass(this._container, 'leaflet-interactive');
+			this._container.classList.remove('leaflet-interactive');
 			this.removeInteractiveTarget(this._container);
 		}
 	},

@@ -1,14 +1,14 @@
-import * as Util from '../core/Util';
-import {Evented} from '../core/Events';
-import {EPSG3857} from '../geo/crs/CRS.EPSG3857';
-import {Point, toPoint} from '../geometry/Point';
-import {Bounds, toBounds} from '../geometry/Bounds';
-import {LatLng, toLatLng} from '../geo/LatLng';
-import {LatLngBounds, toLatLngBounds} from '../geo/LatLngBounds';
-import Browser from '../core/Browser';
-import * as DomEvent from '../dom/DomEvent';
-import * as DomUtil from '../dom/DomUtil';
-import {PosAnimation} from '../dom/PosAnimation';
+import * as Util from '../core/Util.js';
+import {Evented} from '../core/Events.js';
+import {EPSG3857} from '../geo/crs/CRS.EPSG3857.js';
+import {Point, toPoint} from '../geometry/Point.js';
+import {Bounds, toBounds} from '../geometry/Bounds.js';
+import {LatLng, toLatLng} from '../geo/LatLng.js';
+import {LatLngBounds, toLatLngBounds} from '../geo/LatLngBounds.js';
+import Browser from '../core/Browser.js';
+import * as DomEvent from '../dom/DomEvent.js';
+import * as DomUtil from '../dom/DomUtil.js';
+import {PosAnimation} from '../dom/PosAnimation.js';
 
 /*
  * @class Map
@@ -136,9 +136,6 @@ export const Map = Evented.extend({
 		this._initContainer(id);
 		this._initLayout();
 
-		// hack for https://github.com/Leaflet/Leaflet/issues/1980
-		this._onResize = this._onResize.bind(this);
-
 		this._initEvents();
 
 		if (options.maxBounds) {
@@ -156,13 +153,13 @@ export const Map = Evented.extend({
 		this.callInitHooks();
 
 		// don't animate on browsers without hardware-accelerated transitions or old Android
-		this._zoomAnimated = DomUtil.TRANSITION && Browser.any3d && this.options.zoomAnimation;
+		this._zoomAnimated = this.options.zoomAnimation;
 
 		// zoom transitions run with the same duration for all layers, so if one of transitionend events
 		// happens after starting zoom animation (propagating to the map pane), we know that it ended globally
 		if (this._zoomAnimated) {
 			this._createAnimProxy();
-			DomEvent.on(this._proxy, DomUtil.TRANSITION_END, this._catchTransitionEnd, this);
+			DomEvent.on(this._proxy, 'transitionend', this._catchTransitionEnd, this);
 		}
 
 		this._addLayers(this.options.layers);
@@ -220,14 +217,14 @@ export const Map = Evented.extend({
 	// @method zoomIn(delta?: Number, options?: Zoom options): this
 	// Increases the zoom of the map by `delta` ([`zoomDelta`](#map-zoomdelta) by default).
 	zoomIn(delta, options) {
-		delta = delta || (Browser.any3d ? this.options.zoomDelta : 1);
+		delta = delta || this.options.zoomDelta;
 		return this.setZoom(this._zoom + delta, options);
 	},
 
 	// @method zoomOut(delta?: Number, options?: Zoom options): this
 	// Decreases the zoom of the map by `delta` ([`zoomDelta`](#map-zoomdelta) by default).
 	zoomOut(delta, options) {
-		delta = delta || (Browser.any3d ? this.options.zoomDelta : 1);
+		delta = delta || this.options.zoomDelta;
 		return this.setZoom(this._zoom - delta, options);
 	},
 
@@ -339,7 +336,7 @@ export const Map = Evented.extend({
 
 		// animate pan unless animate: false specified
 		if (options.animate !== false) {
-			DomUtil.addClass(this._mapPane, 'leaflet-pan-anim');
+			this._mapPane.classList.add('leaflet-pan-anim');
 
 			const newPos = this._getMapPanePos().subtract(offset).round();
 			this._panAnim.run(this._mapPane, newPos, options.duration || 0.25, options.easeLinearity);
@@ -357,7 +354,7 @@ export const Map = Evented.extend({
 	flyTo(targetCenter, targetZoom, options) {
 
 		options = options || {};
-		if (options.animate === false || !Browser.any3d) {
+		if (options.animate === false) {
 			return this.setView(targetCenter, targetZoom, options);
 		}
 
@@ -763,7 +760,7 @@ export const Map = Evented.extend({
 
 		this._stop();
 
-		DomUtil.remove(this._mapPane);
+		this._mapPane.remove();
 
 		if (this._clearControlPos) {
 			this._clearControlPos();
@@ -787,7 +784,7 @@ export const Map = Evented.extend({
 			this._layers[i].remove();
 		}
 		for (i in this._panes) {
-			DomUtil.remove(this._panes[i]);
+			this._panes[i].remove();
 		}
 
 		this._layers = [];
@@ -872,7 +869,7 @@ export const Map = Evented.extend({
 		      se = bounds.getSouthEast(),
 		      size = this.getSize().subtract(padding),
 		      boundsSize = toBounds(this.project(se, zoom), this.project(nw, zoom)).getSize(),
-		      snap = Browser.any3d ? this.options.zoomSnap : 1,
+		      snap = this.options.zoomSnap,
 		      scalex = size.x / boundsSize.x,
 		      scaley = size.y / boundsSize.y,
 		      scale = inside ? Math.max(scalex, scaley) : Math.min(scalex, scaley);
@@ -1100,15 +1097,18 @@ export const Map = Evented.extend({
 	_initLayout() {
 		const container = this._container;
 
-		this._fadeAnimated = this.options.fadeAnimation && Browser.any3d;
+		this._fadeAnimated = this.options.fadeAnimation;
 
-		DomUtil.addClass(container, `leaflet-container${
-			Browser.touch ? ' leaflet-touch' : ''
-		}${Browser.retina ? ' leaflet-retina' : ''
-		}${Browser.safari ? ' leaflet-safari' : ''
-		}${this._fadeAnimated ? ' leaflet-fade-anim' : ''}`);
+		const classes = ['leaflet-container'];
 
-		const position = DomUtil.getStyle(container, 'position');
+		if (Browser.touch) { classes.push('leaflet-touch'); }
+		if (Browser.retina) { classes.push('leaflet-retina'); }
+		if (Browser.safari) { classes.push('leaflet-safari'); }
+		if (this._fadeAnimated) { classes.push('leaflet-fade-anim'); }
+
+		container.classList.add(...classes);
+
+		const {position} = getComputedStyle(container);
 
 		if (position !== 'absolute' && position !== 'relative' && position !== 'fixed' && position !== 'sticky') {
 			container.style.position = 'relative';
@@ -1160,8 +1160,8 @@ export const Map = Evented.extend({
 		this.createPane('popupPane');
 
 		if (!this.options.markerZoomAnimation) {
-			DomUtil.addClass(panes.markerPane, 'leaflet-zoom-hide');
-			DomUtil.addClass(panes.shadowPane, 'leaflet-zoom-hide');
+			panes.markerPane.classList.add('leaflet-zoom-hide');
+			panes.shadowPane.classList.add('leaflet-zoom-hide');
 		}
 	},
 
@@ -1320,10 +1320,17 @@ export const Map = Evented.extend({
 			'mouseover mouseout mousemove contextmenu keypress keydown keyup', this._handleDOMEvent, this);
 
 		if (this.options.trackResize) {
-			onOff(window, 'resize', this._onResize, this);
+			if (!remove) {
+				if (!this._resizeObserver) {
+					this._resizeObserver = new ResizeObserver(this._onResize.bind(this));
+				}
+				this._resizeObserver.observe(this._container);
+			} else {
+				this._resizeObserver.disconnect();
+			}
 		}
 
-		if (Browser.any3d && this.options.transform3DLimit) {
+		if (this.options.transform3DLimit) {
 			(remove ? this.off : this.on).call(this, 'moveend', this._onMoveEnd);
 		}
 	},
@@ -1449,7 +1456,7 @@ export const Map = Evented.extend({
 		for (let i = 0; i < targets.length; i++) {
 			targets[i].fire(type, data, true);
 			if (data.originalEvent._stopped ||
-				(targets[i].options.bubblingMouseEvents === false && Util.indexOf(this._mouseEvents, type) !== -1)) { return; }
+				(targets[i].options.bubblingMouseEvents === false && this._mouseEvents.includes(type))) { return; }
 		}
 	},
 
@@ -1582,7 +1589,7 @@ export const Map = Evented.extend({
 	_limitZoom(zoom) {
 		const min = this.getMinZoom(),
 		    max = this.getMaxZoom(),
-		    snap = Browser.any3d ? this.options.zoomSnap : 1;
+		    snap = this.options.zoomSnap;
 		if (snap) {
 			zoom = Math.round(zoom / snap) * snap;
 		}
@@ -1594,7 +1601,7 @@ export const Map = Evented.extend({
 	},
 
 	_onPanTransitionEnd() {
-		DomUtil.removeClass(this._mapPane, 'leaflet-pan-anim');
+		this._mapPane.classList.remove('leaflet-pan-anim');
 		this.fire('moveend');
 	},
 
@@ -1616,13 +1623,12 @@ export const Map = Evented.extend({
 		this._panes.mapPane.appendChild(proxy);
 
 		this.on('zoomanim', function (e) {
-			const prop = DomUtil.TRANSFORM,
-			    transform = this._proxy.style[prop];
+			const transform = this._proxy.style.transform;
 
 			DomUtil.setTransform(this._proxy, this.project(e.center, e.zoom), this.getZoomScale(e.zoom, 1));
 
 			// workaround for case when transform is the same and so transitionend event is not fired
-			if (transform === this._proxy.style[prop] && this._animatingZoom) {
+			if (transform === this._proxy.style.transform && this._animatingZoom) {
 				this._onZoomTransitionEnd();
 			}
 		}, this);
@@ -1633,7 +1639,7 @@ export const Map = Evented.extend({
 	},
 
 	_destroyAnimProxy() {
-		DomUtil.remove(this._proxy);
+		this._proxy.remove();
 		this.off('load moveend', this._animMoveEnd, this);
 		delete this._proxy;
 	},
@@ -1645,7 +1651,7 @@ export const Map = Evented.extend({
 	},
 
 	_catchTransitionEnd(e) {
-		if (this._animatingZoom && e.propertyName.indexOf('transform') >= 0) {
+		if (this._animatingZoom && e.propertyName.includes('transform')) {
 			this._onZoomTransitionEnd();
 		}
 	},
@@ -1690,7 +1696,7 @@ export const Map = Evented.extend({
 			this._animateToCenter = center;
 			this._animateToZoom = zoom;
 
-			DomUtil.addClass(this._mapPane, 'leaflet-zoom-anim');
+			this._mapPane.classList.add('leaflet-zoom-anim');
 		}
 
 		// @section Other Events
@@ -1716,7 +1722,7 @@ export const Map = Evented.extend({
 		if (!this._animatingZoom) { return; }
 
 		if (this._mapPane) {
-			DomUtil.removeClass(this._mapPane, 'leaflet-zoom-anim');
+			this._mapPane.classList.remove('leaflet-zoom-anim');
 		}
 
 		this._animatingZoom = false;

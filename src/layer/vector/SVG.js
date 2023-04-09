@@ -1,9 +1,7 @@
-import {Renderer} from './Renderer';
-import * as DomUtil from '../../dom/DomUtil';
-import * as DomEvent from '../../dom/DomEvent';
-import Browser from '../../core/Browser';
-import {stamp} from '../../core/Util';
-import {svgCreate, pointsToPath} from './SVG.Util';
+import {Renderer} from './Renderer.js';
+import * as DomUtil from '../../dom/DomUtil.js';
+import {splitWords, stamp} from '../../core/Util.js';
+import {svgCreate, pointsToPath} from './SVG.Util.js';
 export {pointsToPath};
 
 export const create = svgCreate;
@@ -49,31 +47,30 @@ export const SVG = Renderer.extend({
 	},
 
 	_destroyContainer() {
-		DomUtil.remove(this._container);
-		DomEvent.off(this._container);
-		delete this._container;
+		Renderer.prototype._destroyContainer.call(this);
 		delete this._rootGroup;
 		delete this._svgSize;
+	},
+
+	_resizeContainer() {
+		const size = Renderer.prototype._resizeContainer.call(this);
+
+		// set size of svg-container if changed
+		if (!this._svgSize || !this._svgSize.equals(size)) {
+			this._svgSize = size;
+			this._container.setAttribute('width', size.x);
+			this._container.setAttribute('height', size.y);
+		}
 	},
 
 	_update() {
 		if (this._map._animatingZoom && this._bounds) { return; }
 
-		Renderer.prototype._update.call(this);
-
 		const b = this._bounds,
 		    size = b.getSize(),
 		    container = this._container;
 
-		// set size of svg-container if changed
-		if (!this._svgSize || !this._svgSize.equals(size)) {
-			this._svgSize = size;
-			container.setAttribute('width', size.x);
-			container.setAttribute('height', size.y);
-		}
-
 		// movement: update container viewBox so that we don't have to change coordinates of individual layers
-		DomUtil.setPosition(container, b.min);
 		container.setAttribute('viewBox', [b.min.x, b.min.y, size.x, size.y].join(' '));
 
 		this.fire('update');
@@ -88,11 +85,11 @@ export const SVG = Renderer.extend({
 		// @option className: String = null
 		// Custom class name set on an element. Only for SVG renderer.
 		if (layer.options.className) {
-			DomUtil.addClass(path, layer.options.className);
+			path.classList.add(...splitWords(layer.options.className));
 		}
 
 		if (layer.options.interactive) {
-			DomUtil.addClass(path, 'leaflet-interactive');
+			path.classList.add('leaflet-interactive');
 		}
 
 		this._updateStyle(layer);
@@ -106,7 +103,7 @@ export const SVG = Renderer.extend({
 	},
 
 	_removePath(layer) {
-		DomUtil.remove(layer._path);
+		layer._path.remove();
 		layer.removeInteractiveTarget(layer._path);
 		delete this._layers[stamp(layer)];
 	},
@@ -190,5 +187,5 @@ export const SVG = Renderer.extend({
 // @factory L.svg(options?: Renderer options)
 // Creates a SVG renderer with the given options.
 export function svg(options) {
-	return Browser.svg ? new SVG(options) : null;
+	return new SVG(options);
 }

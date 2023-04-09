@@ -1,11 +1,11 @@
-import {Layer} from '../Layer';
-import {IconDefault} from './Icon.Default';
-import * as Util from '../../core/Util';
-import {toLatLng as latLng} from '../../geo/LatLng';
-import {toPoint as point} from '../../geometry/Point';
-import * as DomUtil from '../../dom/DomUtil';
-import * as DomEvent from '../../dom/DomEvent';
-import {MarkerDrag} from './Marker.Drag';
+import {Layer} from '../Layer.js';
+import {IconDefault} from './Icon.Default.js';
+import * as Util from '../../core/Util.js';
+import {toLatLng as latLng} from '../../geo/LatLng.js';
+import {toPoint as point} from '../../geometry/Point.js';
+import * as DomUtil from '../../dom/DomUtil.js';
+import * as DomEvent from '../../dom/DomEvent.js';
+import {MarkerDrag} from './Marker.Drag.js';
 
 /*
  * @class Marker
@@ -231,7 +231,7 @@ export const Marker = Layer.extend({
 			}
 		}
 
-		DomUtil.addClass(icon, classToAdd);
+		icon.classList.add(classToAdd);
 
 		if (options.keyboard) {
 			icon.tabIndex = '0';
@@ -260,7 +260,7 @@ export const Marker = Layer.extend({
 		}
 
 		if (newShadow) {
-			DomUtil.addClass(newShadow, classToAdd);
+			newShadow.classList.add(classToAdd);
 			newShadow.alt = '';
 		}
 		this._shadow = newShadow;
@@ -292,7 +292,7 @@ export const Marker = Layer.extend({
 			DomEvent.off(this._icon, 'focus', this._panOnFocus, this);
 		}
 
-		DomUtil.remove(this._icon);
+		this._icon.remove();
 		this.removeInteractiveTarget(this._icon);
 
 		this._icon = null;
@@ -300,7 +300,7 @@ export const Marker = Layer.extend({
 
 	_removeShadow() {
 		if (this._shadow) {
-			DomUtil.remove(this._shadow);
+			this._shadow.remove();
 		}
 		this._shadow = null;
 	},
@@ -337,7 +337,7 @@ export const Marker = Layer.extend({
 
 		if (!this.options.interactive) { return; }
 
-		DomUtil.addClass(this._icon, 'leaflet-interactive');
+		this._icon.classList.add('leaflet-interactive');
 
 		this.addInteractiveTarget(this._icon);
 
@@ -371,11 +371,11 @@ export const Marker = Layer.extend({
 		const opacity = this.options.opacity;
 
 		if (this._icon) {
-			DomUtil.setOpacity(this._icon, opacity);
+			this._icon.style.opacity = opacity;
 		}
 
 		if (this._shadow) {
-			DomUtil.setOpacity(this._shadow, opacity);
+			this._shadow.style.opacity = opacity;
 		}
 	},
 

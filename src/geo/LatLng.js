@@ -1,6 +1,6 @@
-import * as Util from '../core/Util';
-import {Earth} from './crs/CRS.Earth';
-import {toLatLngBounds} from './LatLngBounds';
+import * as Util from '../core/Util.js';
+import {Earth} from './crs/CRS.Earth.js';
+import {toLatLngBounds} from './LatLngBounds.js';
 
 /* @class LatLng
  * @aka L.LatLng
@@ -114,7 +114,7 @@ export function toLatLng(a, b, c) {
 	if (a instanceof LatLng) {
 		return a;
 	}
-	if (Util.isArray(a) && typeof a[0] !== 'object') {
+	if (Array.isArray(a) && typeof a[0] !== 'object') {
 		if (a.length === 3) {
 			return new LatLng(a[0], a[1], a[2]);
 		}

@@ -1,5 +1,5 @@
-import {Layer} from '../Layer';
-import * as Util from '../../core/Util';
+import {Layer} from '../Layer.js';
+import * as Util from '../../core/Util.js';
 
 /*
  * @class Path
@@ -105,7 +105,7 @@ export const Path = Layer.extend({
 		Util.setOptions(this, style);
 		if (this._renderer) {
 			this._renderer._updateStyle(this);
-			if (this.options.stroke && style && Object.prototype.hasOwnProperty.call(style, 'weight')) {
+			if (this.options.stroke && style && Object.hasOwn(style, 'weight')) {
 				this._updateBounds();
 			}
 		}

@@ -1,9 +1,9 @@
-import {Handler} from '../../core/Handler';
-import * as DomUtil from '../../dom/DomUtil';
-import {Draggable} from '../../dom/Draggable';
-import {toBounds} from '../../geometry/Bounds';
-import {toPoint} from '../../geometry/Point';
-import {requestAnimFrame, cancelAnimFrame} from '../../core/Util';
+import {Handler} from '../../core/Handler.js';
+import * as DomUtil from '../../dom/DomUtil.js';
+import {Draggable} from '../../dom/Draggable.js';
+import {toBounds} from '../../geometry/Bounds.js';
+import {toPoint} from '../../geometry/Point.js';
+import {requestAnimFrame, cancelAnimFrame} from '../../core/Util.js';
 
 /*
  * L.Handler.MarkerDrag is used internally by L.Marker to make the markers draggable.
@@ -42,7 +42,7 @@ export const MarkerDrag = Handler.extend({
 			dragend: this._onDragEnd
 		}, this).enable();
 
-		DomUtil.addClass(icon, 'leaflet-marker-draggable');
+		icon.classList.add('leaflet-marker-draggable');
 	},
 
 	removeHooks() {
@@ -54,7 +54,7 @@ export const MarkerDrag = Handler.extend({
 		}, this).disable();
 
 		if (this._marker._icon) {
-			DomUtil.removeClass(this._marker._icon, 'leaflet-marker-draggable');
+			this._marker._icon.classList.remove('leaflet-marker-draggable');
 		}
 	},
 

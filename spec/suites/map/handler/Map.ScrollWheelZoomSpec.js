@@ -1,13 +1,11 @@
-describe("Map.ScrollWheelZoom", () => {
+describe('Map.ScrollWheelZoom', () => {
 	let container, map;
 	const wheel = 'onwheel' in window ? 'wheel' : 'mousewheel';
 	const scrollIn = {
-		type: wheel,
 		deltaY: -120,
 		deltaMode: 0
 	};
 	const scrollOut = {
-		type: wheel,
 		deltaY: 120,
 		deltaMode: 0
 	};
@@ -25,9 +23,10 @@ describe("Map.ScrollWheelZoom", () => {
 		removeMapContainer(map, container);
 	});
 
-	it("zooms out while firing 'wheel' event", (done) => {
+	it('zooms out while firing \'wheel\' event', (done) => {
 		const zoom = map.getZoom();
-		happen.once(container, scrollOut);
+
+		UIEventSimulator.fire(wheel, container, scrollOut);
 
 		map.on('zoomend', () => {
 			// Bug 1.8.0: Firefox wheel zoom makes 2 steps #7403
@@ -37,9 +36,9 @@ describe("Map.ScrollWheelZoom", () => {
 		});
 	});
 
-	it("zooms in while firing 'wheel' event", (done) => {
+	it('zooms in while firing \'wheel\' event', (done) => {
 		const zoom = map.getZoom();
-		happen.once(container, scrollIn);
+		UIEventSimulator.fire(wheel, container, scrollIn);
 
 		map.on('zoomend', () => {
 			// Bug 1.8.0: Firefox wheel zoom makes 2 steps #7403
@@ -49,11 +48,11 @@ describe("Map.ScrollWheelZoom", () => {
 		});
 	});
 
-	it("scrollWheelZoom: 'center'", (done) => {
+	it('scrollWheelZoom: \'center\'', (done) => {
 		const scrollWheelZoomBefore = map.options.scrollWheelZoom;
 		map.options.scrollWheelZoom = 'center';
 		const zoom = map.getZoom();
-		happen.once(container, scrollIn);
+		UIEventSimulator.fire(wheel, container, scrollIn);
 
 		map.on('zoomend', () => {
 			expect(map.getCenter()).to.be.nearLatLng([0, 0]);
@@ -63,7 +62,7 @@ describe("Map.ScrollWheelZoom", () => {
 		});
 	});
 
-	it("changes the option 'wheelDebounceTime'", (done) => {
+	it('changes the option \'wheelDebounceTime\'', (done) => {
 		const wheelDebounceTimeBefore = map.options.wheelDebounceTime;
 		map.options.wheelDebounceTime = 100;
 		const zoom = map.getZoom();
@@ -71,9 +70,9 @@ describe("Map.ScrollWheelZoom", () => {
 		const spy = sinon.spy();
 		map.on('zoomend', spy);
 
-		happen.once(container, scrollIn);
+		UIEventSimulator.fire(wheel, container, scrollIn);
 		setTimeout(() => {
-			happen.once(container, scrollIn);
+			UIEventSimulator.fire(wheel, container, scrollIn);
 
 			expect(spy.notCalled).to.be.ok();
 		}, 50);
@@ -88,12 +87,12 @@ describe("Map.ScrollWheelZoom", () => {
 		});
 	});
 
-	it("changes the option 'wheelPxPerZoomLevel'", (done) => {
+	it('changes the option \'wheelPxPerZoomLevel\'', (done) => {
 		const wheelPxPerZoomLevelBefore = map.options.wheelPxPerZoomLevel;
 		map.setZoom(15, {animate: false});
 
 		const zoom = map.getZoom();
-		happen.once(container, scrollIn);
+		UIEventSimulator.fire(wheel, container, scrollIn);
 
 		map.once('zoomend', () => {
 			expect(map.getZoom()).to.be.greaterThan(zoom);
@@ -103,7 +102,7 @@ describe("Map.ScrollWheelZoom", () => {
 			expect(map.getZoom()).to.be(zoom);
 
 			map.options.wheelPxPerZoomLevel = 30 / L.DomEvent.getWheelPxFactor();
-			happen.once(container, scrollIn);
+			UIEventSimulator.fire(wheel, container, scrollIn);
 
 			map.once('zoomend', () => {
 				expect(map.getZoom()).to.be.greaterThan(zoom);

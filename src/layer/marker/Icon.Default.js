@@ -1,5 +1,5 @@
-import {Icon} from './Icon';
-import * as DomUtil from '../../dom/DomUtil';
+import {Icon} from './Icon.js';
+import * as DomUtil from '../../dom/DomUtil.js';
 
 /*
  * @miniclass Icon.Default (Icon)
@@ -53,11 +53,9 @@ export const IconDefault = Icon.extend({
 
 	_detectIconPath() {
 		const el = DomUtil.create('div',  'leaflet-default-icon-path', document.body);
-		let path = DomUtil.getStyle(el, 'background-image') ||
-		           DomUtil.getStyle(el, 'backgroundImage');	// IE8
+		const path = this._stripUrl(getComputedStyle(el).backgroundImage);
 
 		document.body.removeChild(el);
-		path = this._stripUrl(path);
 		if (path) { return path; }
 		const link = document.querySelector('link[href$="leaflet.css"]');
 		if (!link) { return ''; }

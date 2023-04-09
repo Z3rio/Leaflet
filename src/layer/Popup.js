@@ -1,11 +1,11 @@
-import {DivOverlay} from './DivOverlay';
-import * as DomEvent from '../dom/DomEvent';
-import * as DomUtil from '../dom/DomUtil';
-import {Point, toPoint} from '../geometry/Point';
-import {Map} from '../map/Map';
-import {Layer} from './Layer';
-import {Path} from './vector/Path';
-import {FeatureGroup} from './FeatureGroup';
+import {DivOverlay} from './DivOverlay.js';
+import * as DomEvent from '../dom/DomEvent.js';
+import * as DomUtil from '../dom/DomUtil.js';
+import {Point, toPoint} from '../geometry/Point.js';
+import {Map} from '../map/Map.js';
+import {Layer} from './Layer.js';
+import {Path} from './vector/Path.js';
+import {FeatureGroup} from './FeatureGroup.js';
 
 /*
  * @class Popup
@@ -34,7 +34,7 @@ import {FeatureGroup} from './FeatureGroup';
  * ```
  * or
  * ```js
- * var popup = L.popup(latlng, {content: '<p>Hello world!<br />This is a nice popup.</p>')
+ * var popup = L.popup(latlng, {content: '<p>Hello world!<br />This is a nice popup.</p>'})
  * 	.openOn(map);
  * ```
  */
@@ -96,6 +96,10 @@ export const Popup = DivOverlay.extend({
 		// @option closeButton: Boolean = true
 		// Controls the presence of a close button in the popup.
 		closeButton: true,
+
+		// @option closeButtonLabel: String = 'Close popup'
+		// Specifies the 'aria-label' attribute of the close button.
+		closeButtonLabel: 'Close popup',
 
 		// @option autoClose: Boolean = true
 		// Set it to `false` if you want to override the default behavior of
@@ -206,7 +210,8 @@ export const Popup = DivOverlay.extend({
 		if (this.options.closeButton) {
 			const closeButton = this._closeButton = DomUtil.create('a', `${prefix}-close-button`, container);
 			closeButton.setAttribute('role', 'button'); // overrides the implicit role=link of <a> elements #7399
-			closeButton.setAttribute('aria-label', 'Close popup');
+			closeButton.setAttribute('aria-label', this.options.closeButtonLabel);
+
 			closeButton.href = '#close';
 			closeButton.innerHTML = '<span aria-hidden="true">&#215;</span>';
 
@@ -239,9 +244,9 @@ export const Popup = DivOverlay.extend({
 
 		if (maxHeight && height > maxHeight) {
 			style.height = `${maxHeight}px`;
-			DomUtil.addClass(container, scrolledClass);
+			container.classList.add(scrolledClass);
 		} else {
-			DomUtil.removeClass(container, scrolledClass);
+			container.classList.remove(scrolledClass);
 		}
 
 		this._containerWidth = this._container.offsetWidth;
@@ -267,7 +272,7 @@ export const Popup = DivOverlay.extend({
 		}
 
 		const map = this._map,
-		    marginBottom = parseInt(DomUtil.getStyle(this._container, 'marginBottom'), 10) || 0,
+		    marginBottom = parseInt(getComputedStyle(this._container).marginBottom, 10) || 0,
 		    containerHeight = this._container.offsetHeight + marginBottom,
 		    containerWidth = this._containerWidth,
 		    layerPos = new Point(this._containerLeft, -containerHeight - this._containerBottom);
@@ -499,7 +504,7 @@ Layer.include({
 	},
 
 	_onKeyPress(e) {
-		if (e.originalEvent.keyCode === 13) {
+		if (e.originalEvent.code === 'Enter') {
 			this._openPopup(e);
 		}
 	}

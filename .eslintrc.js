@@ -10,7 +10,6 @@ module.exports = {
 		'docs/examples/extending/extending-2-layers.md',
 		'docs/_posts/201*',
 		'docs/_site',
-		'build/integrity.js'
 	],
 	root: true,
 	globals: {
@@ -22,7 +21,8 @@ module.exports = {
 	},
 	extends: 'mourner',
 	plugins: [
-		'@mapbox/eslint-plugin-script-tags'
+		'@mapbox/eslint-plugin-script-tags',
+		'eslint-plugin-import'
 	],
 	parserOptions: {
 		ecmaVersion: 'latest',
@@ -31,6 +31,7 @@ module.exports = {
 	rules: {
 		'consistent-return': 'off',
 		'curly': 'error',
+		'import/extensions': ['error', 'ignorePackages'],
 		'indent': ['error', 'tab', {VariableDeclarator: 0, flatTernaryExpressions: true}],
 		'key-spacing': 'off',
 		'linebreak-style': ['off', 'unix'],
@@ -41,6 +42,7 @@ module.exports = {
 		'wrap-iife': 'off',
 		// TODO: Re-enable the rules below and fix the linting issues.
 		'no-invalid-this': 'off',
+		'prefer-object-has-own': 'error',
 		'prefer-spread': 'off'
 	},
 	overrides: [

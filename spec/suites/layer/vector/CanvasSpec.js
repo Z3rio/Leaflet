@@ -16,48 +16,48 @@ describe('Canvas', () => {
 		removeMapContainer(map, container);
 	});
 
-	describe("#events", () => {
+	describe('#events', () => {
 		let layer;
 
 		beforeEach(() => {
 			layer = L.polygon(latLngs).addTo(map);
 		});
 
-		it("should fire event when layer contains mouse", () => {
+		it('should fire event when layer contains mouse', () => {
 			const spy = sinon.spy();
 			layer.on('click', spy);
-			happen.at('click', 50, 50);  // Click on the layer.
+			UIEventSimulator.fireAt('click', 50, 50);  // Click on the layer.
 			expect(spy.callCount).to.eql(1);
-			happen.at('click', 150, 150);  // Click outside layer.
+			UIEventSimulator.fireAt('click', 150, 150);  // Click outside layer.
 			expect(spy.callCount).to.eql(1);
 		});
 
-		it("DOM events propagate from canvas polygon to map", () => {
+		it('DOM events propagate from canvas polygon to map', () => {
 			const spy = sinon.spy();
-			map.on("click", spy);
-			happen.at('click', 50, 50);
+			map.on('click', spy);
+			UIEventSimulator.fireAt('click', 50, 50);
 			expect(spy.callCount).to.eql(1);
 		});
 
-		it("DOM events fired on canvas polygon can be cancelled before being caught by the map", () => {
+		it('DOM events fired on canvas polygon can be cancelled before being caught by the map', () => {
 			const mapSpy = sinon.spy();
 			const layerSpy = sinon.spy();
-			map.on("click", mapSpy);
-			layer.on("click", L.DomEvent.stopPropagation).on("click", layerSpy);
-			happen.at('click', 50, 50);
+			map.on('click', mapSpy);
+			layer.on('click', L.DomEvent.stopPropagation).on('click', layerSpy);
+			UIEventSimulator.fireAt('click', 50, 50);
 			expect(layerSpy.callCount).to.eql(1);
 			expect(mapSpy.callCount).to.eql(0);
 		});
 
-		it("DOM events fired on canvas polygon are propagated only once to the map even when two layers contains the event", () => {
+		it('DOM events fired on canvas polygon are propagated only once to the map even when two layers contains the event', () => {
 			const spy = sinon.spy();
 			L.polygon(latLngs).addTo(map); // layer 2
-			map.on("click", spy);
-			happen.at('click', 50, 50);
+			map.on('click', spy);
+			UIEventSimulator.fireAt('click', 50, 50);
 			expect(spy.callCount).to.eql(1);
 		});
 
-		it("should be transparent for DOM events going to non-canvas features", () => {
+		it('should be transparent for DOM events going to non-canvas features', () => {
 			const marker = L.marker(map.layerPointToLatLng([150, 150]))
 				.addTo(map);
 			const circle = L.circle(map.layerPointToLatLng([200, 200]), {
@@ -69,29 +69,29 @@ describe('Canvas', () => {
 			const spyMap = sinon.spy();
 			const spyMarker = sinon.spy();
 			const spyCircle = sinon.spy();
-			layer.on("click", spyPolygon);
-			map.on("click", spyMap);
-			marker.on("click", spyMarker);
-			circle.on("click", spyCircle);
+			layer.on('click', spyPolygon);
+			map.on('click', spyMap);
+			marker.on('click', spyMarker);
+			circle.on('click', spyCircle);
 
-			happen.at('click', 50, 50);   // polygon (canvas)
-			happen.at('click', 151, 151); // empty space
-			happen.at('click', 150, 148); // marker
-			happen.at('click', 200, 200); // circle (svg)
+			UIEventSimulator.fireAt('click', 50, 50);   // polygon (canvas)
+			UIEventSimulator.fireAt('click', 151, 151); // empty space
+			UIEventSimulator.fireAt('click', 150, 148); // marker
+			UIEventSimulator.fireAt('click', 200, 200); // circle (svg)
 			expect(spyPolygon.callCount).to.eql(1);
 			expect(spyMap.callCount).to.eql(3); // except marker
 			expect(spyMarker.callCount).to.eql(1);
 			expect(spyCircle.callCount).to.eql(1);
 		});
 
-		it("should not block mousemove event going to non-canvas features", () => {
+		it('should not block mousemove event going to non-canvas features', () => {
 			const spyMap = sinon.spy();
-			map.on("mousemove", spyMap);
-			happen.at('mousemove', 151, 151); // empty space
+			map.on('mousemove', spyMap);
+			UIEventSimulator.fireAt('mousemove', 151, 151); // empty space
 			expect(spyMap.calledOnce).to.be.ok();
 		});
 
-		it("should fire preclick before click", () => {
+		it('should fire preclick before click', () => {
 			const clickSpy = sinon.spy();
 			const preclickSpy = sinon.spy();
 			layer.on('click', clickSpy);
@@ -99,15 +99,15 @@ describe('Canvas', () => {
 			layer.once('preclick', () => {
 				expect(clickSpy.called).to.be(false);
 			});
-			happen.at('click', 50, 50);  // Click on the layer.
+			UIEventSimulator.fireAt('click', 50, 50);  // Click on the layer.
 			expect(clickSpy.callCount).to.eql(1);
 			expect(preclickSpy.callCount).to.eql(1);
-			happen.at('click', 150, 150);  // Click outside layer.
+			UIEventSimulator.fireAt('click', 150, 150);  // Click outside layer.
 			expect(clickSpy.callCount).to.eql(1);
 			expect(preclickSpy.callCount).to.eql(1);
 		});
 
-		it("should not fire click when dragging the map on top of it", (done) => {
+		it('should not fire click when dragging the map on top of it', (done) => {
 			const downSpy = sinon.spy();
 			const clickSpy = sinon.spy();
 			const preclickSpy = sinon.spy();
@@ -119,7 +119,7 @@ describe('Canvas', () => {
 				onStop() {
 					// Prosthetic does not fire a click when we down+up, but it real world
 					// browsers would, so let's simulate it.
-					happen.at('click', 70, 60);
+					UIEventSimulator.fireAt('click', 70, 60);
 					expect(downSpy.called).to.be(true);
 					expect(clickSpy.called).to.be(false);
 					expect(preclickSpy.called).to.be(false);
@@ -134,7 +134,7 @@ describe('Canvas', () => {
 				.down().moveBy(20, 10, 200).up();
 		});
 
-		it("does fire mousedown on layer after dragging map", (done) => { // #7775
+		it('does fire mousedown on layer after dragging map', (done) => { // #7775
 			const spy = sinon.spy();
 			const center = p2ll(300, 300);
 			const radius = p2ll(200, 200).distanceTo(center);
@@ -157,14 +157,14 @@ describe('Canvas', () => {
 		});
 	});
 
-	describe("#events(interactive=false)", () => {
-		it("should not fire click when not interactive", () => {
+	describe('#events(interactive=false)', () => {
+		it('should not fire click when not interactive', () => {
 			const layer = L.polygon(latLngs, {interactive: false}).addTo(map);
 			const spy = sinon.spy();
 			layer.on('click', spy);
-			happen.at('click', 50, 50);  // Click on the layer.
+			UIEventSimulator.fireAt('click', 50, 50);  // Click on the layer.
 			expect(spy.callCount).to.eql(0);
-			happen.at('click', 150, 150);  // Click outside layer.
+			UIEventSimulator.fireAt('click', 150, 150);  // Click outside layer.
 			expect(spy.callCount).to.eql(0);
 		});
 	});
@@ -172,14 +172,14 @@ describe('Canvas', () => {
 	describe('#dashArray', () => {
 		it('can add polyline with dashArray', () => {
 			L.polygon(latLngs, {
-				dashArray: "5,5"
+				dashArray: '5,5'
 			}).addTo(map);
 		});
 
 		it('can setStyle with dashArray', () => {
 			const layer = L.polygon(latLngs).addTo(map);
 			layer.setStyle({
-				dashArray: "5,5"
+				dashArray: '5,5'
 			});
 		});
 	});
@@ -249,14 +249,14 @@ describe('Canvas', () => {
 	});
 
 	describe('Canvas #remove', () => {
-		it("can remove the map without errors", (done) => {
+		it('can remove the map without errors', (done) => {
 			L.polygon(latLngs).addTo(map);
 			map.remove();
 			map = null;
 			L.Util.requestAnimFrame(() => { done(); });
 		});
 
-		it("can remove renderer without errors", (done) => {
+		it('can remove renderer without errors', (done) => {
 			map.remove();
 
 			const canvas = L.canvas();

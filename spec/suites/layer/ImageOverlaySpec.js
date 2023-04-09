@@ -30,12 +30,12 @@ describe('ImageOverlay', () => {
 		});
 	});
 
-	describe("_image", () => {
+	describe('_image', () => {
 		let overlay;
 
 		// Url for testing errors
 		const errorUrl = 'data:image/false;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAT1JREFUOI2dk79qwlAUxr9zcKmxbyAWh0IIDqJrcchkX6ODrn2TDAWRPEkyKKVzBxHJkKFoySP0mlLhnA5NbIgmpf6my73n+853/xFKRLY9UJEpAy6Am2x6q8xLYZ73omhVrKd88DocNpvGPBHwUDYtIiL+9X7/2EmS9GiQiUMC7urER1RfLGPGnSRJGQCyzidiy/Nged6pAdHoo9XyAIAj2x78FfscBEw3jtNnFZn+V5zDIhPOTvsiFHAZv1d1SYIuXyrOaQDYArg9t3gIw1qxML81lHlJFQZfQVBrwKoLFuZ5VUHlO8ggVZ97UbQSEf9cwSEMq7ehOrPjeE0A8N5uXxnLCkA0qs2cIcBzM03vu7vdJwNAJ0lSy5hxVZJy51wMFH5jzsZx+iwyUcBlkS7wc9qsuiBV347jdbH+G/fth7AzHdiJAAAAAElFTkSuQmCC';
-		const blankUrl = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+		const blankUrl = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 
 		// Create overlay for each test
 		beforeEach(() => {
@@ -90,7 +90,7 @@ describe('ImageOverlay', () => {
 
 		describe('className', () => {
 			it('should set image\'s class', () => {
-				expect(L.DomUtil.hasClass(overlay._image, 'my-custom-image-class')).to.be(true);
+				expect(overlay._image.classList.contains('my-custom-image-class')).to.be(true);
 			});
 		});
 	});
@@ -141,12 +141,10 @@ describe('ImageOverlay', () => {
 			expect(overlay.getPopup().getLatLng()).to.be.nearLatLng([40.743078, -74.175995]);
 		});
 	});
-	// For tests that do not actually need to append the map container to the document.
-	// This saves PhantomJS memory.
-	const _describe = 'crossOrigin' in L.DomUtil.create('img') ? describe : describe.skip; // skip in IE<11
-	_describe('crossOrigin option', () => {
+
+	describe('crossOrigin option', () => {
 		let overlay;
-		const blankUrl = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+		const blankUrl = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 
 		// https://html.spec.whatwg.org/multipage/urls-and-fetching.html#cors-settings-attributes
 		testCrossOriginValue(undefined, null); // Falsy value (other than empty string '') => no attribute set.

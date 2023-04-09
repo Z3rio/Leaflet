@@ -1,9 +1,9 @@
-import {Evented} from '../core/Events';
-import Browser from '../core/Browser';
-import * as DomEvent from './DomEvent';
-import * as DomUtil from './DomUtil';
-import * as Util from '../core/Util';
-import {Point} from '../geometry/Point';
+import {Evented} from '../core/Events.js';
+import Browser from '../core/Browser.js';
+import * as DomEvent from './DomEvent.js';
+import * as DomUtil from './DomUtil.js';
+import * as Util from '../core/Util.js';
+import {Point} from '../geometry/Point.js';
 
 /*
  * @class Draggable
@@ -78,7 +78,7 @@ export const Draggable = Evented.extend({
 
 		this._moved = false;
 
-		if (DomUtil.hasClass(this._element, 'leaflet-zoom-anim')) { return; }
+		if (this._element.classList.contains('leaflet-zoom-anim')) { return; }
 
 		if (e.touches && e.touches.length !== 1) {
 			// Finish dragging to avoid conflict with touchZoom
@@ -88,7 +88,7 @@ export const Draggable = Evented.extend({
 			return;
 		}
 
-		if (Draggable._dragging || e.shiftKey || ((e.which !== 1) && (e.button !== 1) && !e.touches)) { return; }
+		if (Draggable._dragging || e.shiftKey || ((e.button !== 0) && !e.touches)) { return; }
 		Draggable._dragging = this;  // Prevent dragging multiple objects at once.
 
 		if (this._preventOutline) {
@@ -149,7 +149,7 @@ export const Draggable = Evented.extend({
 
 			this._moved = true;
 
-			DomUtil.addClass(document.body, 'leaflet-dragging');
+			document.body.classList.add('leaflet-dragging');
 
 			this._lastTarget = e.target || e.srcElement;
 			// IE and Edge do not give the <use> element, so fetch it
@@ -157,7 +157,7 @@ export const Draggable = Evented.extend({
 			if (window.SVGElementInstance && this._lastTarget instanceof window.SVGElementInstance) {
 				this._lastTarget = this._lastTarget.correspondingUseElement;
 			}
-			DomUtil.addClass(this._lastTarget, 'leaflet-drag-target');
+			this._lastTarget.classList.add('leaflet-drag-target');
 		}
 
 		this._newPos = this._startPos.add(offset);
@@ -189,10 +189,10 @@ export const Draggable = Evented.extend({
 	},
 
 	finishDrag(noInertia) {
-		DomUtil.removeClass(document.body, 'leaflet-dragging');
+		document.body.classList.remove('leaflet-dragging');
 
 		if (this._lastTarget) {
-			DomUtil.removeClass(this._lastTarget, 'leaflet-drag-target');
+			this._lastTarget.classList.remove('leaflet-drag-target');
 			this._lastTarget = null;
 		}
 

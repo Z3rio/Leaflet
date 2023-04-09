@@ -1,8 +1,8 @@
-import {Layer} from './Layer';
-import * as Util from '../core/Util';
-import {toLatLngBounds} from '../geo/LatLngBounds';
-import {Bounds} from '../geometry/Bounds';
-import * as DomUtil from '../dom/DomUtil';
+import {Layer} from './Layer.js';
+import * as Util from '../core/Util.js';
+import {toLatLngBounds} from '../geo/LatLngBounds.js';
+import {Bounds} from '../geometry/Bounds.js';
+import * as DomUtil from '../dom/DomUtil.js';
 
 /*
  * @class ImageOverlay
@@ -53,7 +53,14 @@ export const ImageOverlay = Layer.extend({
 
 		// @option className: String = ''
 		// A custom class name to assign to the image. Empty by default.
-		className: ''
+		className: '',
+
+		// @option decoding: String = 'auto'
+		// Tells the browser whether to decode the image in a synchronous fashion,
+		// as per the [`decoding` HTML attribute](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/decoding).
+		// If the image overlay is flickering when being added/removed, set
+		// this option to `'sync'`.
+		decoding: 'auto'
 	},
 
 	initialize(url, bounds, options) { // (String, LatLngBounds, Object)
@@ -73,7 +80,7 @@ export const ImageOverlay = Layer.extend({
 		}
 
 		if (this.options.interactive) {
-			DomUtil.addClass(this._image, 'leaflet-interactive');
+			this._image.classList.add('leaflet-interactive');
 			this.addInteractiveTarget(this._image);
 		}
 
@@ -82,7 +89,7 @@ export const ImageOverlay = Layer.extend({
 	},
 
 	onRemove() {
-		DomUtil.remove(this._image);
+		this._image.remove();
 		if (this.options.interactive) {
 			this.removeInteractiveTarget(this._image);
 		}
@@ -184,9 +191,9 @@ export const ImageOverlay = Layer.extend({
 		const wasElementSupplied = this._url.tagName === 'IMG';
 		const img = this._image = wasElementSupplied ? this._url : DomUtil.create('img');
 
-		DomUtil.addClass(img, 'leaflet-image-layer');
-		if (this._zoomAnimated) { DomUtil.addClass(img, 'leaflet-zoom-animated'); }
-		if (this.options.className) { DomUtil.addClass(img, this.options.className); }
+		img.classList.add('leaflet-image-layer');
+		if (this._zoomAnimated) { img.classList.add('leaflet-zoom-animated'); }
+		if (this.options.className) { img.classList.add(...Util.splitWords(this.options.className)); }
 
 		img.onselectstart = Util.falseFn;
 		img.onmousemove = Util.falseFn;
@@ -199,6 +206,8 @@ export const ImageOverlay = Layer.extend({
 		if (this.options.crossOrigin || this.options.crossOrigin === '') {
 			img.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
 		}
+
+		img.decoding = this.options.decoding;
 
 		if (this.options.zIndex) {
 			this._updateZIndex();
@@ -234,7 +243,7 @@ export const ImageOverlay = Layer.extend({
 	},
 
 	_updateOpacity() {
-		DomUtil.setOpacity(this._image, this.options.opacity);
+		this._image.style.opacity = this.options.opacity;
 	},
 
 	_updateZIndex() {

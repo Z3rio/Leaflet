@@ -1,8 +1,8 @@
 
-import {Class} from '../core/Class';
-import {Map} from '../map/Map';
-import * as Util from '../core/Util';
-import * as DomUtil from '../dom/DomUtil';
+import {Class} from '../core/Class.js';
+import {Map} from '../map/Map.js';
+import * as Util from '../core/Util.js';
+import * as DomUtil from '../dom/DomUtil.js';
 
 /*
  * @class Control
@@ -71,9 +71,9 @@ export const Control = Class.extend({
 		    pos = this.getPosition(),
 		    corner = map._controlCorners[pos];
 
-		DomUtil.addClass(container, 'leaflet-control');
+		container.classList.add('leaflet-control');
 
-		if (pos.indexOf('bottom') !== -1) {
+		if (pos.includes('bottom')) {
 			corner.insertBefore(container, corner.firstChild);
 		} else {
 			corner.appendChild(container);
@@ -91,7 +91,7 @@ export const Control = Class.extend({
 			return this;
 		}
 
-		DomUtil.remove(this._container);
+		this._container.remove();
 
 		if (this.onRemove) {
 			this.onRemove(this._map);
@@ -165,9 +165,9 @@ Map.include({
 
 	_clearControlPos() {
 		for (const i in this._controlCorners) {
-			DomUtil.remove(this._controlCorners[i]);
+			this._controlCorners[i].remove();
 		}
-		DomUtil.remove(this._controlContainer);
+		this._controlContainer.remove();
 		delete this._controlCorners;
 		delete this._controlContainer;
 	}

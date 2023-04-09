@@ -1,13 +1,13 @@
-import {LayerGroup} from './LayerGroup';
-import {FeatureGroup} from './FeatureGroup';
-import * as Util from '../core/Util';
-import {Marker} from './marker/Marker';
-import {Circle} from './vector/Circle';
-import {CircleMarker} from './vector/CircleMarker';
-import {Polyline} from './vector/Polyline';
-import {Polygon} from './vector/Polygon';
-import {LatLng, toLatLng} from '../geo/LatLng';
-import * as LineUtil from '../geometry/LineUtil';
+import {LayerGroup} from './LayerGroup.js';
+import {FeatureGroup} from './FeatureGroup.js';
+import * as Util from '../core/Util.js';
+import {Marker} from './marker/Marker.js';
+import {Circle} from './vector/Circle.js';
+import {CircleMarker} from './vector/CircleMarker.js';
+import {Polyline} from './vector/Polyline.js';
+import {Polygon} from './vector/Polygon.js';
+import {LatLng, toLatLng} from '../geo/LatLng.js';
+import * as LineUtil from '../geometry/LineUtil.js';
 
 
 /*
@@ -96,7 +96,7 @@ export const GeoJSON = FeatureGroup.extend({
 	// @method addData( <GeoJSON> data ): this
 	// Adds a GeoJSON object to the layer.
 	addData(geojson) {
-		const features = Util.isArray(geojson) ? geojson : geojson.features;
+		const features = Array.isArray(geojson) ? geojson : geojson.features;
 		let i, len, feature;
 
 		if (features) {
@@ -273,22 +273,22 @@ export function latLngToCoords(latlng, precision) {
 		[Util.formatNum(latlng.lng, precision), Util.formatNum(latlng.lat, precision)];
 }
 
-// @function latLngsToCoords(latlngs: Array, levelsDeep?: Number, closed?: Boolean, precision?: Number|false): Array
+// @function latLngsToCoords(latlngs: Array, levelsDeep?: Number, close?: Boolean, precision?: Number|false): Array
 // Reverse of [`coordsToLatLngs`](#geojson-coordstolatlngs)
-// `closed` determines whether the first point should be appended to the end of the array to close the feature, only used when `levelsDeep` is 0. False by default.
+// `close` determines whether the first point should be appended to the end of the array to close the feature, only used when `levelsDeep` is 0. False by default.
 // Coordinates values are rounded with [`formatNum`](#util-formatnum) function.
-export function latLngsToCoords(latlngs, levelsDeep, closed, precision) {
+export function latLngsToCoords(latlngs, levelsDeep, close, precision) {
 	const coords = [];
 
 	for (let i = 0, len = latlngs.length; i < len; i++) {
 		// Check for flat arrays required to ensure unbalanced arrays are correctly converted in recursion
 		coords.push(levelsDeep ?
-			latLngsToCoords(latlngs[i], LineUtil.isFlat(latlngs[i]) ? 0 : levelsDeep - 1, closed, precision) :
+			latLngsToCoords(latlngs[i], LineUtil.isFlat(latlngs[i]) ? 0 : levelsDeep - 1, close, precision) :
 			latLngToCoords(latlngs[i], precision));
 	}
 
-	if (!levelsDeep && closed) {
-		coords.push(coords[0]);
+	if (!levelsDeep && close && coords.length > 0) {
+		coords.push(coords[0].slice());
 	}
 
 	return coords;

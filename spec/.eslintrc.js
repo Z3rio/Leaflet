@@ -1,8 +1,7 @@
 /** @type {import('eslint').Linter.Config } */
 module.exports = {
 	rules: {
-		'no-console': 'off',
-		'quotes': 'off'
+		'no-console': 'off'
 	},
 	env: {
 		mocha: true,
@@ -11,7 +10,7 @@ module.exports = {
 		L: true,
 		expect: false,
 		sinon: false,
-		happen: false,
+		UIEventSimulator: false,
 		Hand: false,
 		touchEventType: false, /* defined in SpecHelper.js */
 		createContainer: false, /* defined in SpecHelper.js */

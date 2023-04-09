@@ -1,7 +1,7 @@
-import {Map} from '../Map';
-import {Handler} from '../../core/Handler';
-import {on, off, stop} from '../../dom/DomEvent';
-import {toPoint} from '../../geometry/Point';
+import {Map} from '../Map.js';
+import {Handler} from '../../core/Handler.js';
+import {on, off, stop} from '../../dom/DomEvent.js';
+import {toPoint} from '../../geometry/Point.js';
 
 
 /*
@@ -24,12 +24,12 @@ Map.mergeOptions({
 export const Keyboard = Handler.extend({
 
 	keyCodes: {
-		left:    [37],
-		right:   [39],
-		down:    [40],
-		up:      [38],
-		zoomIn:  [187, 107, 61, 171],
-		zoomOut: [189, 109, 54, 173]
+		left:    ['ArrowLeft'],
+		right:   ['ArrowRight'],
+		down:    ['ArrowDown'],
+		up:      ['ArrowUp'],
+		zoomIn:  ['Equal', 'NumpadAdd', 'BracketRight'],
+		zoomOut: ['Minus', 'NumpadSubtract', 'Digit6', 'Slash']
 	},
 
 	initialize(map) {
@@ -50,7 +50,7 @@ export const Keyboard = Handler.extend({
 		on(container, {
 			focus: this._onFocus,
 			blur: this._onBlur,
-			mousedown: this._onMouseDown
+			pointerdown: this._onPointerDown
 		}, this);
 
 		this._map.on({
@@ -65,7 +65,7 @@ export const Keyboard = Handler.extend({
 		off(this._map._container, {
 			focus: this._onFocus,
 			blur: this._onBlur,
-			mousedown: this._onMouseDown
+			pointerdown: this._onPointerDown
 		}, this);
 
 		this._map.off({
@@ -74,7 +74,8 @@ export const Keyboard = Handler.extend({
 		}, this);
 	},
 
-	_onMouseDown() {
+	//  acquire/lose focus #594, #1228, #1540
+	_onPointerDown() {
 		if (this._focused) { return; }
 
 		const body = document.body,
@@ -140,7 +141,7 @@ export const Keyboard = Handler.extend({
 	_onKeyDown(e) {
 		if (e.altKey || e.ctrlKey || e.metaKey) { return; }
 
-		const key = e.keyCode,
+		const key = e.code,
 		     map = this._map;
 		let offset;
 
@@ -151,16 +152,21 @@ export const Keyboard = Handler.extend({
 					offset = toPoint(offset).multiplyBy(3);
 				}
 
-				map.panBy(offset);
-
 				if (map.options.maxBounds) {
-					map.panInsideBounds(map.options.maxBounds);
+					offset = map._limitOffset(toPoint(offset), map.options.maxBounds);
+				}
+
+				if (map.options.worldCopyJump) {
+					const newLatLng = map.wrapLatLng(map.unproject(map.project(map.getCenter()).add(offset)));
+					map.panTo(newLatLng);
+				} else {
+					map.panBy(offset);
 				}
 			}
 		} else if (key in this._zoomKeys) {
 			map.setZoom(map.getZoom() + (e.shiftKey ? 3 : 1) * this._zoomKeys[key]);
 
-		} else if (key === 27 && map._popup && map._popup.options.closeOnEscapeKey) {
+		} else if (key === 'Escape' && map._popup && map._popup.options.closeOnEscapeKey) {
 			map.closePopup();
 
 		} else {
